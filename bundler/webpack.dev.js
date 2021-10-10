@@ -14,6 +14,7 @@ module.exports = merge(
     {
         stats: 'errors-warnings',
         mode: 'development',
+        // devtool: 'inline-source-map',
         devServer:
         {
             host: 'local-ip',
