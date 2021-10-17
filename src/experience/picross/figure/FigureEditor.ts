@@ -1,97 +1,120 @@
-import { Intersection, Object3D, Raycaster, Vector3 } from "three";
-import Experience from "../../Experience";
-import IPointerPositions from "../../utils/pointer/IPointerPositions";
-import Block from "../block/Block";
+import { Intersection, Object3D, Vector3 } from "three";
+import { FigureEditorAction } from "../../../shared/FigureEditorAction";
+import { Editor } from "../Editor";
+import Block from "./block/Block";
 import Figure from "./Figure";
 
-export default class FigureEditor {
-    private experience: Experience;
-    private raycaster: Raycaster;
-    private hoveredBlock: Block | null = null;
+export default class FigureEditor extends Editor {
+    private indicatorBlock: Block;
 
-    constructor(private figure: Figure) {
-        this.experience = new Experience();
-        this.raycaster = new Raycaster();
+    constructor(figure: Figure) {
+        super(figure, FigureEditorAction.BUILDING);
+        
+        this.indicatorBlock = new Block({x: 1, y: 0, z: 0, isInitial: false, opacity: .3, destroyable: false }, this.figure);
+        this.indicatorBlock.visible = false;
+        
+        this.scene.add(this.indicatorBlock);
 
-        this.experience.pointer!.on('pointermove', this.pointerMove.bind(this))
-
-        this.experience.pointer!.on('pointerShortLeftClickUp', (position: IPointerPositions) => {
-            this.pointerShortLeftClickUp(position)
-        })
-
-        this.experience.pointer!.on('pointerShortRightClickUp', (position: IPointerPositions) => {
-            this.pointerShortRightClickUp(position)
-        })
+        this.setTweaks();
     }
 
-    private addBlock(intersect: Intersection<Object3D>) {
-        const clickedBlock = this.figure.blocks.find(x => x == intersect.object);
-        if (clickedBlock) {
+    private get figure(): Figure {
+        return this.picrossObject as Figure;
+    }
+
+    public onHoverBlock = (intersect: Intersection<Object3D>) => {
+        this.updateIndicatorBlockPosition(intersect);
+    }
+
+    public onNoHoverBlock = () => {
+        if (this.indicatorBlock.visible) {
+            this.indicatorBlock.visible = false;
+        }
+        this.figure.getBlocks().forEach(block => block.setOpacity(1));
+    }
+
+    public replaceFigure = (figure: Figure) => {
+        this.picrossObject = figure;
+        this.indicatorBlock.figure = figure;
+        this.indicatorBlock.geometry = figure.getBlockGeometry();
+    }
+
+    public setActiveAction = (activeAction: FigureEditorAction) => {
+        this.activeAction = activeAction;
+    }
+
+    public getFigure = (): Figure => {
+        return this.figure;
+    }
+
+    public dispose = () => {
+        this.figure.dispose();
+        this.indicatorBlock.geometry.dispose();
+        this.indicatorBlock.getMaterial().dispose();
+    }
+
+    private addBlock = (intersect: Intersection<Object3D>) => {
+        const newBlockPosition = this.getNewBlockPosition(intersect);
+        if (newBlockPosition) {
+            this.figure.addBlock(new Block({...newBlockPosition, isInitial: false, opacity: 1, destroyable: false }, this.figure));
+        }
+    }
+
+    private customizeBlock = (intersect: Intersection<Object3D>) => {
+        console.log('customize', intersect);
+    }
+
+    private updateIndicatorBlockPosition = (intersect: Intersection<Object3D>) => {
+        if (this.activeAction === FigureEditorAction.BUILDING) {
+            if (!this.indicatorBlock.visible) {
+                this.indicatorBlock.visible = true;
+            }
+            const newBlockPosition = this.getNewBlockPosition(intersect);
+            if (newBlockPosition && !this.indicatorBlock.figurePosition.equals(newBlockPosition)) {
+                this.indicatorBlock.figurePosition = newBlockPosition;
+            }
+        }
+        else if (this.activeAction === FigureEditorAction.DESTROYING) {
+            const pointedBlock = this.figure.getBlock(intersect.object);
+            if (pointedBlock) {
+                this.figure.getBlocks().forEach(block => block.setOpacity(1));
+                if (!pointedBlock.isInitial) {
+                    pointedBlock.setOpacity(0.5);
+                }
+            }
+        }
+    }
+
+    private getNewBlockPosition = (intersect: Intersection<Object3D>): Vector3 | null => {
+        const pointedBlock = this.figure.getBlock(intersect.object);
+        if (pointedBlock) {
             const newBlockDirection = new Vector3(
                 Math.round(intersect.face!.normal.x + (intersect.face!.normal.x > 0 ? -0.3 : 0.3)),
                 Math.round(intersect.face!.normal.y + (intersect.face!.normal.y > 0 ? -0.3 : 0.3)),
                 Math.round(intersect.face!.normal.z + (intersect.face!.normal.z > 0 ? -0.3 : 0.3))
             );
-            const newBlockPosition = clickedBlock.figurePosition.clone().add(newBlockDirection);
-            if (!this.figure.blocks.some(x => x.figurePosition.equals(newBlockPosition))) {
-                const block = new Block({...newBlockPosition, ...this.figure.tweakableProperties, color: this.figure.tweakableProperties.defaultColor }, this.figure.blockGeometry);
-                this.figure.blocks.push(block)
-                this.figure.setBlockPosition(block, newBlockPosition);
-            }
+            return pointedBlock.figurePosition.clone().add(newBlockDirection);
         }
+        return null;
     }
 
-    removeBlock(intersect: Intersection<Object3D>) {
-        const clickedBlock = this.figure.blocks.find(x => x == intersect.object);
+    private removeBlock = (intersect: Intersection<Object3D>) => {
+        const clickedBlock = this.figure.getBlock(intersect.object);
         if (clickedBlock && !clickedBlock.isInitial) {
-            this.experience.scene!.remove(clickedBlock);
-            this.figure.blocks = this.figure.blocks.filter(x => x !== clickedBlock);
+            this.figure.removeBlock(clickedBlock);
         }
     }
 
-    onHoverBlock(intersect: Intersection<Object3D>) {
-        const hoveredBlock = this.figure.blocks.find(x => x == intersect.object)
-        if (hoveredBlock && hoveredBlock != this.hoveredBlock) {
-            if (hoveredBlock.isInitial === false) {
-                hoveredBlock.setColor(this.figure.tweakableProperties.hoverColor);
-            }
-            if (this.hoveredBlock?.isInitial === false) {
-                this.hoveredBlock?.setColor(this.figure.tweakableProperties.defaultColor);
-            }
-        }
-        this.hoveredBlock = hoveredBlock || null;
+    private setTweaks = () => {
+        const blockFolder = this.experience.tweakpane!.folders.block;
+        blockFolder.on('change', () => {
+            this.indicatorBlock.geometry = this.figure.getBlockGeometry();
+        })
     }
-
-    onNoHoverBlock() {
-        if (this.hoveredBlock?.isInitial === false) {
-            this.hoveredBlock.setColor(this.figure.tweakableProperties.defaultColor);
-        }
-        this.hoveredBlock = null;
-    }
-
-    onHover(positions: IPointerPositions, onHoverBlock: Function, onNoHoverBlock?: Function) {
-        this.raycaster.setFromCamera(positions, this.experience.camera!.instance!);
-        var intersect = this.raycaster.intersectObjects(this.figure.blocks);
-        
-        if (intersect.length > 0) {
-            onHoverBlock?.(intersect[0]);
-        }
-        else {
-            onNoHoverBlock?.();
-        }
-    }
-
-    pointerMove(positions: IPointerPositions)
-    {
-        this.onHover(positions, this.onHoverBlock.bind(this), this.onNoHoverBlock.bind(this));
-    }
-
-    pointerShortLeftClickUp(positions: IPointerPositions)
-    {
-        this.onHover(positions, this.addBlock.bind(this));
-    }
-
-    pointerShortRightClickUp(positions: IPointerPositions) {
-        this.onHover(positions, this.removeBlock.bind(this));
-    }
+    
+    public actionOnClick: { [editorAction: string]: (intersect: Intersection<Object3D>) => void; } = {
+        [FigureEditorAction.BUILDING.toString()]: this.addBlock,
+        [FigureEditorAction.DESTROYING.toString()]: this.removeBlock,
+        [FigureEditorAction.CUSTOMIZING.toString()]: this.customizeBlock,
+    };
 }

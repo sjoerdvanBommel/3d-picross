@@ -1,13 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Experience from './experience/Experience'
-import './assets/tailwind.css';
-import BuildFigureMenu from './react/components/build-figure-menu';
+import Experience from './experience/Experience';
+import { App } from './react/App';
 
 new Experience({
     targetElement: document.querySelector('.experience')
 })
 
 ReactDOM.render(
-    <BuildFigureMenu />, document.getElementById('react-content')
+    <App />, document.getElementById('react-content')
 );

@@ -1,8 +1,8 @@
 import { PerspectiveCamera, Scene } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import Experience from './Experience';
-import Sizes from './utils/Sizes';
-import Time from './utils/Time';
+import Experience from '../Experience';
+import Sizes from '../utils/Sizes';
+import Time from '../utils/Time';
 
 export default class Camera
 {
@@ -57,7 +57,7 @@ export default class Camera
         this.modes.debug = {}
         this.modes.debug.instance = this.instance.clone()
         this.modes.debug.instance.rotation.reorder('YXZ')
-        this.modes.debug.instance.position.set(5, 5, 5)
+        this.modes.debug.instance.position.set(10, 10, 10)
         
         this.modes.debug.orbitControls = new OrbitControls(this.modes.debug.instance, this.targetElement)
         this.modes.debug.orbitControls.enabled = this.modes.debug.active

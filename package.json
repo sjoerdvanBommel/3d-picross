@@ -6,6 +6,7 @@
     "dev": "webpack serve --config ./bundler/webpack.dev.js"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.4",
     "portfinder-sync": "0.0.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

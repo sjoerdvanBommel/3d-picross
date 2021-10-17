@@ -1,17 +1,15 @@
 import * as THREE from 'three'
 import { Scene } from 'three'
-import assets from './Assets'
-import Camera from './Camera'
-import Renderer from './Renderer'
-import Resources from './Resources'
+import Picross from './picross/Picross'
+import assets from './utils/Assets'
+import Camera from './utils/Camera'
 import Pointer from './utils/pointer/Pointer'
+import Renderer from './utils/Renderer'
+import Resources from './utils/Resources'
 import Sizes from './utils/Sizes'
 import Stats from './utils/Stats'
 import Time from './utils/Time'
-import Tweakpane from './utils/Tweakpane'
-import World from './World'
-
-
+import Tweakpane from './utils/tweakpane/Tweakpane'
 
 export default class Experience
 {
@@ -28,7 +26,7 @@ export default class Experience
     public renderer!: Renderer;
     public rendererInstance!: any;
     public resources!: Resources;
-    public world!: World;
+    public picross!: Picross;
 
 
     constructor(_options: any = {})
@@ -120,7 +118,7 @@ export default class Experience
 
     setWorld()
     {
-        this.world = new World()
+        this.picross = new Picross()
     }
 
     update()

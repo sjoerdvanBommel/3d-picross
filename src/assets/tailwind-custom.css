@@ -1,0 +1,11 @@
+.btn {
+    @apply font-bold py-2 px-4 rounded block w-full my-2;
+}
+
+.btn-blue {
+    @apply bg-white text-picross-blue-light;
+}
+
+.btn-blue:hover {
+    @apply text-picross-blue-light;
+}

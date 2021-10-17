@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import EventEmitter from './utils/EventEmitter';
-import Loader from './utils/Loader';
+import EventEmitter from '../utils/EventEmitter';
+import Loader from '../utils/Loader';
 
 export default class Resources extends EventEmitter
 {
-    private items: any;
+    public items: any;
     private loader: Loader;
     private groups: any;
 

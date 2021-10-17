@@ -1,0 +1,43 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body
+{
+    overflow: hidden;
+}
+
+.experience
+{
+    position: fixed;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+#react-content * {
+    z-index: 2;
+}
+
+body .tp-dfwv {
+    z-index: 3;
+    width: 400px;
+}
+
+.picross-menu .inner {
+    clip-path: circle(10% at 15% 8.5%);
+    transition: all .5s ease-in-out;
+}
+
+.picross-menu .inner:hover {
+    clip-path: circle(75%);
+}
+
+i.fas::before {
+    vertical-align: middle;
+    align: center;
+}

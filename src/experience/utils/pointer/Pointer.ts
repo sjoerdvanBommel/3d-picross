@@ -1,4 +1,5 @@
 import EventEmitter from '../EventEmitter';
+import { PicrossPointerEvent } from './PicrossPointerEvent';
 
 const LEFT_MOUSE_BUTTON = 0;
 const RIGHT_MOUSE_BUTTON = 2;
@@ -24,7 +25,7 @@ export default class Pointer extends EventEmitter
         this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
         this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;            
 
-        this.trigger('pointermove', [this.mouse])
+        this.trigger(PicrossPointerEvent.MOVE.event, [this.mouse])
     }
 
     pointerDown(event: PointerEvent)
@@ -45,10 +46,10 @@ export default class Pointer extends EventEmitter
         const diffY = Math.abs(this.mouse.y - this.startY);
         if (diffX < this.dragDelta && diffY < this.dragDelta) {
             if (event.button == LEFT_MOUSE_BUTTON) {
-                this.trigger('pointerShortLeftClickUp', [this.mouse])
+                this.trigger(PicrossPointerEvent.SHORT_LEFT_CLICK_UP.event, [this.mouse])
             }
             if (event.button == RIGHT_MOUSE_BUTTON) {
-                this.trigger('pointerShortRightClickUp', [this.mouse])
+                this.trigger(PicrossPointerEvent.SHORT_RIGHT_CLICK_UP.event, [this.mouse])
             }
         }
     }

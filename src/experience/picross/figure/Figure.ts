@@ -1,76 +1,119 @@
-import { BufferGeometry, ExtrudeBufferGeometry, MeshMatcapMaterial, Shape, Vector3 } from "three";
-import { TpChangeEvent } from "tweakpane";
+import { ExtrudeBufferGeometry, Object3D, Scene, Shape, Vector3 } from "three";
+import { nameof } from "../../../shared/HelperFunctions";
 import Experience from "../../Experience";
-import Block from "../block/Block";
-import { IBlockGeometryProperties } from "../block/IBlockGeometryProperties";
-import IBlockProperties from "../block/IBlockProperties";
+import { IPicrossObject } from "../PicrossObject";
+import Block from "./block/Block";
+import IBlockProperties from "./block/IBlockProperties";
 import ITweakableFigureProperties from "./ITweakableFigureProperties";
 
-export default class Figure {
-    public tweakableProperties: ITweakableFigureProperties = {
-        initialBlockColor: '#999999',
-        defaultColor: '#b8ebff',
-        hoverColor: '#8fdfff',
-        radius: 0.05,
-        smoothness: 5,
-        width: 1,
-        height: 1,
-        depth: 1,
-        margin: 0.025
+export default class Figure implements IPicrossObject {
+    private blockGeometry;
+    private tweakableProperties: ITweakableFigureProperties = {
+        blockRadius: 0.05,
+        blockSmoothness: 7,
+        blockWidth: 1,
+        blockHeight: 1,
+        blockDepth: 1,
+        marginBetweenBlocks: 0.015
     };
-    public blockGeometry: BufferGeometry;
-    public blocks: Block[] = [];
-
+    private scene: Scene;
     private experience: Experience;
+    private tweakInputs: any[] = [];
+    private blocks: Block[] = [];
 
     constructor(blockOptions: IBlockProperties[]) {
         this.experience = new Experience();
+        this.scene = this.experience.scene;
         this.setTweaks();
+        this.blockGeometry = this.createBlockGeometry();
 
-        this.blockGeometry = this.createBlockGeometry(this.tweakableProperties);
-        this.blocks = blockOptions.map(blockOptions => new Block({
-            ...blockOptions,
-            color: blockOptions.isInitial === true ? this.tweakableProperties.initialBlockColor : this.tweakableProperties.defaultColor
-        }, this.blockGeometry));
+        this.blocks = blockOptions.map(blockOption =>
+            new Block({
+                ...blockOption,
+                color: blockOption.isInitial === true ? '#ffffff' : null
+            }, this)
+        );
+
+        this.scene.add(...this.blocks);
     }
 
-    public updateTweakableProperties(tweakableFigureProperties: ITweakableFigureProperties, updateGeometry: boolean) {
-        this.tweakableProperties.defaultColor = tweakableFigureProperties.defaultColor;
-        this.tweakableProperties.hoverColor = tweakableFigureProperties.hoverColor;
-        this.blockGeometry = this.createBlockGeometry(tweakableFigureProperties);
-        
+    public addBlock(block: Block) {
+        if (this.getBlock(block.figurePosition) === null) {
+            this.blocks.push(block);
+            this.scene.add(block);
+        }
+    }
+
+    public removeBlock(block: Block) {
+        this.scene.remove(block);
+        this.blocks = this.blocks.filter(x => x !== block);
+    }
+
+    public getBlock(positionOrObject: Vector3 | Object3D): Block | null {
+        if (positionOrObject instanceof Vector3) {
+            return this.blocks.find(block => block.figurePosition.equals(positionOrObject)) ?? null;
+        }
+        return this.blocks.find(block => block === positionOrObject) ?? null;
+    }
+
+    public getBlocks() {
+        return this.blocks;
+    }
+
+    public getBlockGeometry() {
+        return this.blockGeometry;
+    }
+
+    public getTweakableProperties() {
+        return this.tweakableProperties;
+    }
+
+    public clone(): Figure {
+        return new Figure(this.blocks.map(x => ({ ...x.figurePosition, isInitial: x.isInitial, opacity: 1, destroyable: false }))!);
+    }
+
+    public dispose() {
+        this.blockGeometry.dispose();
+        this.tweakInputs.forEach(tweakInput => tweakInput.dispose());
         this.blocks.forEach(block => {
-            if (block.isInitial) {
-                (block.material as MeshMatcapMaterial).color.set(this.tweakableProperties.initialBlockColor);
-            } else {
-                (block.material as MeshMatcapMaterial).color.set(block.isBeingHovered ? this.tweakableProperties.hoverColor : this.tweakableProperties.defaultColor);
-            }
+            block.getMaterial().dispose();
+            block.geometry.dispose();
+        });
+        this.scene.remove(...this.blocks);
+        this.blocks = [];
+    }
 
-            if (updateGeometry) {
-                block.geometry = this.blockGeometry;
-            }
+    private setTweaks() {
+        const blockFolder = this.experience.tweakpane.folders.block;
+        blockFolder.on('change', this.updateTweakableProperties.bind(this));
+        this.tweakInputs = [
+            blockFolder.addInput(this.tweakableProperties, nameof<ITweakableFigureProperties>("blockRadius"), { min: 0, max: 0.5, label: 'Radius' }),
+            blockFolder.addInput(this.tweakableProperties, nameof<ITweakableFigureProperties>("blockSmoothness"), { min: 1, max: 10, step: 1, label: 'Smoothness' }),
+            blockFolder.addInput(this.tweakableProperties, nameof<ITweakableFigureProperties>("blockWidth"), { min: 0.25, max: 10, label: 'Width' }),
+            blockFolder.addInput(this.tweakableProperties, nameof<ITweakableFigureProperties>("blockHeight"), { min: 0.25, max: 10, label: 'Height' }),
+            blockFolder.addInput(this.tweakableProperties, nameof<ITweakableFigureProperties>("blockDepth"), { min: 0.25, max: 10, label: 'Depth' }),
+            blockFolder.addInput(this.tweakableProperties, nameof<ITweakableFigureProperties>("marginBetweenBlocks"), { min: 0, max: 0.5, label: 'Margin' })
+        ];
+    }
 
-            this.setBlockPosition(block, block.figurePosition);
+    private updateTweakableProperties() {
+        this.blockGeometry = this.createBlockGeometry();
+        this.blocks.forEach(block => {
+            block.geometry = this.blockGeometry;
+            block.updatePosition();
         });
     }
 
-    public setBlockPosition(block: Block, figurePosition: Vector3) {
-        block.position.set(
-            figurePosition.x ? figurePosition.x * this.tweakableProperties.width + figurePosition.x * this.tweakableProperties.margin : 0,
-            figurePosition.y ? figurePosition.y * this.tweakableProperties.height + figurePosition.y * this.tweakableProperties.margin : 0,
-            figurePosition.z ? figurePosition.z * this.tweakableProperties.depth + figurePosition.z * this.tweakableProperties.margin : 0
-        )
-    }
-
-    private createBlockGeometry({ width, height, depth, radius, smoothness }: IBlockGeometryProperties) {
-        let shape = new Shape();
-        let eps = 0.00001;
-        let radius0 = radius - eps;
+    private createBlockGeometry() {
+        const { blockWidth: width, blockHeight: height, blockDepth: depth, blockRadius: radius, blockSmoothness: smoothness } = this.tweakableProperties;
+        const shape = new Shape();
+        const eps = 0.00001;
+        const radius0 = radius - eps;
         shape.absarc(eps, eps, eps, -Math.PI / 2, -Math.PI, true);
         shape.absarc(eps, height - radius0 * 2, eps, Math.PI, Math.PI / 2, true);
         shape.absarc(width - radius0 * 2, height - radius0 * 2, eps, Math.PI / 2, 0, true);
         shape.absarc(width - radius0 * 2, eps, eps, 0, -Math.PI / 2, true);
-        let geometry = new ExtrudeBufferGeometry(shape, {
+        const geometry = new ExtrudeBufferGeometry(shape, {
             depth: depth - radius * 2,
             bevelEnabled: true,
             bevelSegments: smoothness * 2,
@@ -83,31 +126,5 @@ export default class Figure {
         geometry.center();
 
         return geometry;
-    }
-
-    setTweaks() {
-        if ((this.experience.config as any).debug != true) {
-            return;
-        }
-
-        this.experience.tweakpane!.folders.block.on('change', (event: TpChangeEvent) => {
-            const mustUpdateGeometry = ['blockWidth', 'blockHeight', 'blockDepth', 'blockRadius', 'blockSmoothness'].includes(event.presetKey);
-            if (mustUpdateGeometry) {
-                if (event.last) {
-                    this.updateTweakableProperties(this.tweakableProperties, mustUpdateGeometry)
-                }
-            }
-            else {
-                this.updateTweakableProperties(this.tweakableProperties, false)
-            }
-        })
-        this.experience.tweakpane!.folders.block.addInput(this.tweakableProperties, 'defaultColor');
-        this.experience.tweakpane!.folders.block.addInput(this.tweakableProperties, 'hoverColor');
-        this.experience.tweakpane!.folders.block.addInput(this.tweakableProperties, 'radius', { min: 0, max: 0.5, presetKey: 'blockRadius' });
-        this.experience.tweakpane!.folders.block.addInput(this.tweakableProperties, 'smoothness', { min: 1, max: 10, step: 1, presetKey: 'blockSmoothness' });
-        this.experience.tweakpane!.folders.block.addInput(this.tweakableProperties, 'width', { min: 0.25, max: 10, presetKey: 'blockWidth' });
-        this.experience.tweakpane!.folders.block.addInput(this.tweakableProperties, 'height', { min: 0.25, max: 10, presetKey: 'blockHeight' });
-        this.experience.tweakpane!.folders.block.addInput(this.tweakableProperties, 'depth', { min: 0.25, max: 10, presetKey: 'blockDepth' });
-        this.experience.tweakpane!.folders.block.addInput(this.tweakableProperties, 'margin', { min: 0, max: 0.5 });
     }
 }

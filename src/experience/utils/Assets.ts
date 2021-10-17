@@ -4,7 +4,7 @@ export default [
         data: {},
         items:
         [
-            { name: 'defaultBlockMatCap', source: '/assets/default-block.jpg', type: 'texture' },
+            { name: 'defaultBlockMatCap', source: '/assets/default-block-light.jpg', type: 'texture' },
         ]
     }
 ]
