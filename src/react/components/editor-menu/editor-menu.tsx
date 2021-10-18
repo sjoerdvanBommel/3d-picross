@@ -23,14 +23,10 @@ const EditorMenu = ({ picross }: IEditorMenuProps) => {
         picross.toggleFigurePuzzleEditor();
     }, [isEditingFigure]);
 
-    return <div>
-        <div className={isEditingFigure ? "" : "hidden"}>
-            <FigureEditorMenu picross={picross} onChangeEditor={editPuzzle}></FigureEditorMenu>
-        </div>
-        <div className={isEditingFigure ? "hidden" : ""}>
-            <PuzzleEditorMenu picross={picross} onChangeEditor={editFigure}></PuzzleEditorMenu>
-        </div>
-    </div>
+    return <aside className="flex sm:flex-col gap-3 pb-4 px-4 sm:px-0 sm:gap-6 sm:mt-12 sm:mr-12 justify-between sm:justify-start sm:items-end">
+        {isEditingFigure && <FigureEditorMenu picross={picross} onChangeEditor={editPuzzle}></FigureEditorMenu>}
+        {!isEditingFigure && <PuzzleEditorMenu picross={picross} onChangeEditor={editFigure}></PuzzleEditorMenu>}
+    </aside>;
 };
 
 export default EditorMenu

@@ -19,14 +19,12 @@ const FigureEditorMenu = ({ picross, onChangeEditor }: IFigureEditorMenuProps) =
         picross.updateFigureEditorActiveAction(active)
     }, [active]);
 
-    return <aside className="flex justify-end">
-        <div className="flex flex-col gap-6 mt-12 mr-8 md:mr-12">
-            <ActionButton active={active === FigureEditorAction.BUILDING} color={ActionButtonColor.Green} icon="hammer" mouseIcon={active.getMouseIcon(FigureEditorAction.BUILDING)} onClick={setBuilding} />
-            <ActionButton active={active === FigureEditorAction.DESTROYING} color={ActionButtonColor.Red} icon="trash" mouseIcon={active.getMouseIcon(FigureEditorAction.DESTROYING)} onClick={setDestroying} />
-            <ActionButton active={active === FigureEditorAction.CUSTOMIZING} color={ActionButtonColor.Blue} icon="palette" mouseIcon={active.getMouseIcon(FigureEditorAction.CUSTOMIZING)} onClick={setCustomizing} />
-            <ActionButton active={false} color={ActionButtonColor.Gray} icon="flag-checkered" onClick={onChangeEditor} />
-        </div>
-    </aside>;
+    return <>
+        <ActionButton active={active === FigureEditorAction.BUILDING} color={ActionButtonColor.Green} icon="hammer" mouseIcon={active.getMouseIcon(FigureEditorAction.BUILDING)} onClick={setBuilding} />
+        <ActionButton active={active === FigureEditorAction.DESTROYING} color={ActionButtonColor.Red} icon="trash" mouseIcon={active.getMouseIcon(FigureEditorAction.DESTROYING)} onClick={setDestroying} />
+        <ActionButton active={active === FigureEditorAction.CUSTOMIZING} color={ActionButtonColor.Blue} icon="palette" mouseIcon={active.getMouseIcon(FigureEditorAction.CUSTOMIZING)} onClick={setCustomizing} />
+        <ActionButton active={false} color={ActionButtonColor.Gray} icon="flag-checkered" onClick={onChangeEditor} />
+    </>;
 };
 
 export default FigureEditorMenu;

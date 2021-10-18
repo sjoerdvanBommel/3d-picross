@@ -1,4 +1,4 @@
-import { Scene, Vector3 } from "three";
+import { Event, Object3D, Scene, Vector3 } from "three";
 import Experience from "../../Experience";
 import Block from "../figure/block/Block";
 import Figure from "../figure/Figure";
@@ -19,6 +19,13 @@ export class Puzzle implements IPicrossObject {
 
     public getBlocks(): Block[] {
         return [...this.figure.getBlocks(), ...this.destroyableBlocks];
+    }
+
+    public getBlock(positionOrObject: Object3D<Event> | Vector3): Block | null {
+        if (positionOrObject instanceof Vector3) {
+            return this.getBlocks().find(block => block.figurePosition.equals(positionOrObject)) ?? null;
+        }
+        return this.getBlocks().find(block => block === positionOrObject) ?? null;
     }
 
     public addDestroyableBlock(block: Block) {

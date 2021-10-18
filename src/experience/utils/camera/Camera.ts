@@ -1,10 +1,12 @@
 import { PerspectiveCamera, Scene } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import Experience from '../Experience';
-import Sizes from '../utils/Sizes';
-import Time from '../utils/Time';
+import Experience from '../../Experience';
+import EventEmitter from '../EventEmitter';
+import Sizes from '../Sizes';
+import Time from '../Time';
+import { CameraEvent } from './CameraEvent';
 
-export default class Camera
+export default class Camera extends EventEmitter
 {
     private experience: Experience;
     private config: any;
@@ -19,6 +21,8 @@ export default class Camera
 
     constructor()
     {
+        super();
+        
         // Options
         this.experience = new Experience()
         this.config = this.experience.config
@@ -65,6 +69,7 @@ export default class Camera
         this.modes.debug.orbitControls.enableKeys = false
         this.modes.debug.orbitControls.enableDamping = true
         this.modes.debug.orbitControls.update()
+        this.modes.debug.orbitControls.addEventListener('change', () => this.trigger(CameraEvent.cameraMoved, [this.instance.position]))
     }
 
 

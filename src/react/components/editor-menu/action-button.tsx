@@ -16,8 +16,8 @@ export enum ActionButtonColor {
 }
 
 export const ActionButton = ({ color, icon, mouseIcon, active = false, onClick }: IActionButtonProps) => (
-    <button onClick={onClick} className={`bg-gradient-to-br ${color} ${active ? 'opacity-100' : 'opacity-40'}  h-24 w-24 rounded-xl shadow-xl relative`}>
-        <i className={`fas fa-${icon} text-white text-5xl`}></i>
+    <button onClick={onClick} className={`bg-gradient-to-br ${color} ${active ? 'opacity-100' : 'opacity-40'}  h-14 w-14 md:h-24 md:w-24 rounded-xl shadow-xl relative overlay`}>
+        <i className={`fas fa-${icon} text-white text-xl md:text-5xl`}></i>
         {mouseIcon && <img src={`./assets/${mouseIcon}.svg`} alt="Mouse left click" className="absolute bottom-2 right-1 w-6 h-6 hidden lg:block" />}
     </button>
 );

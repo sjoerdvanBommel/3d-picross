@@ -1,4 +1,4 @@
-import { Intersection, Object3D, Raycaster, Scene, Vector2 } from "three";
+import { Intersection, Object3D, Raycaster, Scene, Vector2, Vector3 } from "three";
 import { IEditorAction } from "../../shared/IEditorAction";
 import Experience from "../Experience";
 import { PicrossPointerEvent } from "../utils/pointer/PicrossPointerEvent";
@@ -33,6 +33,19 @@ export abstract class Editor {
         else {
             onNoHoverBlock?.();
         }
+    }
+
+    protected getNewPicrossObjectPosition = (intersect: Intersection<Object3D>): Vector3 | null => {
+        const pointedBlock = this.picrossObject.getBlock(intersect.object);
+        if (pointedBlock) {
+            const newBlockDirection = new Vector3(
+                Math.round(intersect.face!.normal.x + (intersect.face!.normal.x > 0 ? -0.3 : 0.3)),
+                Math.round(intersect.face!.normal.y + (intersect.face!.normal.y > 0 ? -0.3 : 0.3)),
+                Math.round(intersect.face!.normal.z + (intersect.face!.normal.z > 0 ? -0.3 : 0.3))
+            );
+            return pointedBlock.figurePosition.clone().add(newBlockDirection);
+        }
+        return null;
     }
 
     private doActionIfBlockLeftClicked = (positions: Vector2) => {

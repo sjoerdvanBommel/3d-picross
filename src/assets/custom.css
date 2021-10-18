@@ -19,7 +19,7 @@ body
     z-index: 1;
 }
 
-#react-content * {
+#react-content .overlay {
     z-index: 2;
 }
 
@@ -29,12 +29,7 @@ body .tp-dfwv {
 }
 
 .picross-menu .inner {
-    clip-path: circle(10% at 15% 8.5%);
     transition: all .5s ease-in-out;
-}
-
-.picross-menu .inner:hover {
-    clip-path: circle(75%);
 }
 
 i.fas::before {

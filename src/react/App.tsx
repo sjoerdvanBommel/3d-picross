@@ -19,7 +19,7 @@ export const App = () => {
         return <></>;
     }
 
-    return <div className="flex justify-between">
+    return <div className="flex flex-col sm:flex-row justify-between h-full w-full">
         <PicrossMenu picross={new Experience().picross} />
         <EditorMenu picross={new Experience().picross} />
     </div>
