@@ -19,14 +19,13 @@ export class PuzzleEditor extends Editor {
         return this.picrossObject as Puzzle;
     }
 
-    public onHoverBlock = (intersect: Intersection<Object3D>): void => {
+    public onMouseHoverBlock = (intersect: Intersection<Object3D>): void => {
         if (!intersect.uv) {
             console.log('test');
-            
         }
     }
     
-    public onNoHoverBlock = (): void => {
+    public onNoMouseHoverBlock = (): void => {
         
     }
 

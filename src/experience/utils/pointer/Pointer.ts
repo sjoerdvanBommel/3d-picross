@@ -15,17 +15,16 @@ export default class Pointer extends EventEmitter
     {
         super()
 
-        window.addEventListener('pointermove', this.pointerMove.bind(this))
+        window.addEventListener('mousemove', this.mouseMove.bind(this))
         window.addEventListener('pointerdown', this.pointerDown.bind(this))
         window.addEventListener('pointerup', this.pointerUp.bind(this))
     }
 
-    pointerMove(event: PointerEvent)
+    mouseMove(event: MouseEvent)
     {
         this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
         this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;            
-
-        this.trigger(PicrossPointerEvent.MOVE.event, [this.mouse])
+        this.trigger(PicrossPointerEvent.MOUSE_MOVE.event, [this.mouse])
     }
 
     pointerDown(event: PointerEvent)

@@ -14,13 +14,13 @@ export abstract class Editor {
         this.scene = this.experience.scene;
         this.raycaster = new Raycaster();
 
-        this.experience.pointer!.on(PicrossPointerEvent.MOVE.event, this.pointerMove);
+        this.experience.pointer!.on(PicrossPointerEvent.MOUSE_MOVE.event, this.mouseMove);
         this.experience.pointer!.on(PicrossPointerEvent.SHORT_LEFT_CLICK_UP.event, this.doActionIfBlockLeftClicked);
         this.experience.pointer!.on(PicrossPointerEvent.SHORT_RIGHT_CLICK_UP.event, this.doActionIfBlockRightClicked);
     }
 
-    public abstract onHoverBlock(intersect: Intersection<Object3D>): void;
-    public abstract onNoHoverBlock(): void;
+    public abstract onMouseHoverBlock(intersect: Intersection<Object3D>): void;
+    public abstract onNoMouseHoverBlock(): void;
     public abstract actionOnClick: { [editorAction: string]: (intersect: Intersection<Object3D>) => void; };
 
     public ifPointing(positions: Vector2, onHoverBlock: (intersect: Intersection<Object3D>) => void, onNoHoverBlock?: () => void) {
@@ -71,7 +71,7 @@ export abstract class Editor {
         }
     }
 
-    private pointerMove = (positions: Vector2) => {
-        this.ifPointing(positions, this.onHoverBlock.bind(this), this.onNoHoverBlock.bind(this));
+    private mouseMove = (positions: Vector2) => {
+        this.ifPointing(positions, this.onMouseHoverBlock.bind(this), this.onNoMouseHoverBlock.bind(this));
     }
 }

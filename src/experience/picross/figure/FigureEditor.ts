@@ -22,7 +22,7 @@ export default class FigureEditor extends Editor {
         return this.picrossObject as Figure;
     }
 
-    public onHoverBlock = (intersect: Intersection<Object3D>) => {
+    public onMouseHoverBlock = (intersect: Intersection<Object3D>) => {
         document.body.style.cursor = 'pointer';
         if (this.activeAction === FigureEditorAction.BUILDING) {
             if (!this.indicatorBlock.visible) {
@@ -44,7 +44,7 @@ export default class FigureEditor extends Editor {
         }
     }
 
-    public onNoHoverBlock = () => {
+    public onNoMouseHoverBlock = () => {
         document.body.style.cursor = 'move';
         if (this.activeAction === FigureEditorAction.BUILDING && this.indicatorBlock.visible) {
             this.indicatorBlock.visible = false;
