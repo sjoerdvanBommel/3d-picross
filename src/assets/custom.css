@@ -8,6 +8,7 @@ html,
 body
 {
     overflow: hidden;
+    height: 100%;
 }
 
 .experience
@@ -15,8 +16,12 @@ body
     position: fixed;
     top: 0;
     width: 100vw;
-    height: 100vh;
+    height: calc(100vh - calc(100vh - 100%));
     z-index: 1;
+}
+
+#react-content {
+    height: calc(100vh - calc(100vh - 100%));
 }
 
 #react-content .overlay {
