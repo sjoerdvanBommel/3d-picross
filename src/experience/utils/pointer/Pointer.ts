@@ -24,7 +24,11 @@ export default class Pointer extends EventEmitter
     {
         this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
         this.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;            
-        this.trigger(PicrossPointerEvent.MOUSE_MOVE.event, [this.mouse])
+
+        // If statement because of weird bug in chrome where mouse/pointer click also count as mousemove event
+        if (event.movementX || event.movementY) {
+            this.trigger(PicrossPointerEvent.MOUSE_MOVE.event, [this.mouse])
+        }
     }
 
     pointerDown(event: PointerEvent)
