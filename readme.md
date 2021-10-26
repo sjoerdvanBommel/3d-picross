@@ -1,6 +1,7 @@
 # 3D Picross
 
 The game picross, but 3D.
+This project is the old version (without using the created template).
 
 ## Setup
 Download [Node.js](https://nodejs.org/en/download/).
